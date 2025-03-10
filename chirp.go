@@ -27,16 +27,12 @@ func handlerChirp(w http.ResponseWriter, r *http.Request) {
    err := decoder.Decode(&newChirp)
 
    if err != nil {
-		resp := errResponse{Error: "Something went wrong"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(resp)
+		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "Something went wrong"})
 		return
    }
 
    if len(newChirp.Body) > 140 {
-		resp := errResponse{Error: "Chirp is too long"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(resp)
+		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "Chirp is too long"})
 		return
    }
 
@@ -55,9 +51,7 @@ func handlerChirp(w http.ResponseWriter, r *http.Request) {
    cleanBody := strings.Join(cleanWords, " ")
    cleanBody = strings.TrimSpace(cleanBody)
 
-   resp := validResponse{CleanedBody: cleanBody}
-   w.WriteHeader(http.StatusOK)
-   json.NewEncoder(w).Encode(resp)
+   writeJSONResponse(w, http.StatusOK, validResponse{CleanedBody: cleanBody})
 }
 
 func contains(list []string, item string) bool {
