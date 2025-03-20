@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Smiliecx/Chirpy/internal/auth"
 	"github.com/Smiliecx/Chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -21,7 +22,6 @@ type ChirpResponse struct {
 func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	type chirp struct {
 		 Body string `json:"body"`
-		 User_id string `json:"user_id"`
 	}
  
 	w.Header().Set("Content-Type", "application/json")
@@ -56,13 +56,19 @@ func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	cleanBody := strings.Join(cleanWords, " ")
 	cleanBody = strings.TrimSpace(cleanBody)
 
-	parsedUUID, err := uuid.Parse(newChirp.User_id)
+	bearer, err := auth.GetBearerToken(r.Header)
 	if err != nil {
-		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "Invalid UUID For User"})
+		writeJSONResponse(w, http.StatusUnauthorized, errResponse{Error: "Could not find bearer token on header"})
 		return
 	}
 
-	dbChirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{Body: cleanBody, UserID: parsedUUID})
+	uuid, err := auth.ValidateJWT(bearer, cfg.authSecret)
+	if err != nil {
+		writeJSONResponse(w, http.StatusUnauthorized, errResponse{Error: "Trouble validating bearer token"})
+		return
+	}
+
+	dbChirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{Body: cleanBody, UserID: uuid})
 	if err != nil {
 		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "Chirp failed insertion into DB"})
 		return

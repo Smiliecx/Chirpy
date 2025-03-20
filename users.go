@@ -9,20 +9,23 @@ import (
 	"github.com/Smiliecx/Chirpy/internal/database"
 )
 
+type user_response struct {
+	Id string `json:"id"`
+	Created_at string `json:"created_at"`
+	Updated_at string `json:"updated_at"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+
 func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	type user_request struct {
 		Email string `json:"email"`
-		Password string `json: "password"`
+		Password string `json:"password"`
 	}
-
-	type user_response struct {
-		Id string `json:"id"`
-		Created_at string `json:"created_at"`
-		Updated_at string `json:"updated_at"`
-		Email string `json:"email"`
-	}
-
-	w.Header().Set("Content-Type", "application/json")
+	
+   w.Header().Set("Content-Type", "application/json")
    defer r.Body.Close()
 
    decoder := json.NewDecoder(r.Body)
@@ -53,8 +56,6 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "User Query Failed"})
 		return
    }
-
-   
 
    writeJSONResponse(w, http.StatusCreated, user_response{
 		Id: new_user.ID.String(),
