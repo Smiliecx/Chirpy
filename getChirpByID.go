@@ -18,7 +18,7 @@ func (cfg *apiConfig) handlerGetChirpByID(w http.ResponseWriter, r *http.Request
 
 	dbChirp, err := cfg.dbQueries.GetOneChirp(r.Context(), uuid)
 	if err != nil {
-		writeJSONResponse(w, http.StatusBadRequest, errResponse{Error: "Data base request for Chirp failed"})
+		writeJSONResponse(w, http.StatusNotFound, errResponse{Error: "Data base request for Chirp failed"})
 		return
 	}
 
